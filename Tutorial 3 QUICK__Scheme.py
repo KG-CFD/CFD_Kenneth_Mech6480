@@ -9,7 +9,7 @@ def generate_matrix_dirichlet(n, dx, convective_flux, diffusive_conductance, bou
     D = diffusive_conductance
 
     a_WW = -1 / 8 * F
-    a_W = D + 7 / 8 * F
+    a_W = D + 7/8* F
     a_E = D - 3 / 8 * F
     a_P = a_W + a_E + a_WW
 
@@ -55,7 +55,7 @@ phi_0 = 1
 phi_L = 0
 
 # GRID GENERATION
-num_cells = 5  # [-]
+num_cells = 16  # [-]
 dx = length / (num_cells)  # [m]
 x_locations = np.linspace(0.5 * dx, (num_cells - 0.5) * dx, num_cells)
 
