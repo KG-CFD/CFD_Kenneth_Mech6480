@@ -6,18 +6,18 @@ LX = 0.6 # Horizontal length in Metres
 LY = 0.03 # Vertical Outlet height in metres
 H =0.03   # vertical Outlet height in metres
 h_inlet = 0.02   # inlet Height
-A_r = h_inlet/ H   #Ratio of Areas
+A_r = h_inlet/H   # Ratio of Areas
 h_step = 0.01  # Step height
 w_step = 0.22  # Width of Step
-RHO = 998. # Density in Kg per m^3
+RHO = 998  # Density in Kg per m^3
 MU = 0.001
 nu = MU / RHO
-U_inlet =0.011523 #ms-1
+U_inlet = 0.011523  #ms-1
 NX = 300
 NY = 15
-Step_cell_y = (h_step/LY)*NY
-Step_cell_x = (w_step/LX)*NX
-DT = 0.01
+Step_cell_y = 5    #int((h_step/LY)*NY)
+Step_cell_x = 110        #int((w_step/LX)*NX)
+DT = 0.005
 NUM_STEPS = 1000
 PLOT_EVERY = 100
 N_PRESSURE_ITS = 100
@@ -43,11 +43,11 @@ dx = LX / NX
 dy = LY / NY
 dxdy = dx * dy
 
-fig, ax1 = plt.subplots(1, 1, figsize=[15, 6])
+fig, ax1 = plt.subplots(1, 1, figsize=[15, 30])
 
 
 def boundary_xvel(vel_field):
-    vel_field[0,:] = U_inlet  # Inflow conditions for y>0.01m
+    vel_field[0,Step_cell_y +1:-1] = U_inlet  # Inflow conditions for y>0.01m
     vel_field[0, 0:(Step_cell_y+1)] = 0.0                          # Inflow I.c for y<0.01m
     u_in = np.sum(vel_field[0, (Step_cell_y +1):-1])  ; u_out = np.sum(vel_field[-2,1:-1])
     epsilon =1e-10
@@ -105,11 +105,11 @@ for steps in range(NUM_STEPS):
         p_next[1:-1, 1:-1] =  (-prhs*dxdy**2 +dy**2*(p[2:, 1:-1] + p[:-2, 1:-1]) + dx**2 *(p[1:-1, 2:] + p[1:-1, :-2]))\
                               /(2*dx**2 +2*dy**2)
         p_next[0,(Step_cell_y+1):-1] =p_next[1,(Step_cell_y+ 1 ):-1]    #inflow B.C
-        p_next[-1, :] = -p_next[-2,:]     #outflow B.C
-        p_next[(Step_cell_x+1):-1,0] = p_next[:,1]     # Bottom wall B.C
+        p_next[-1, :] = p_next[-2,:]     #outflow B.C   # using dirichlet B.C
+        p_next[(Step_cell_x+1):-1, 0] = p_next[(Step_cell_x+1):-1,1]     # Bottom wall B.C
         p_next[:,-1] = p_next[:,-2]   #Top wall B.C
         p_next[1:(Step_cell_x+1),Step_cell_y] =p_next[1:(Step_cell_x+1),(Step_cell_y+1)]       #Top of step B.C
-        p_next[Step_cell_x,1:(Step_cell_y+1)] = p_next[(Step_cell_x+1),1:(Step_cell_y+1)]
+        p_next[Step_cell_x,1:(Step_cell_y+1)] = p_next[(Step_cell_x+1),1:(Step_cell_y+1)]   #Right edge of step
         p_next[:Step_cell_x,:Step_cell_y] = 0.0                          #Setting all pressure val in step to 0
         p = p_next.copy()
     # Step 3: Correct velocities with pressure gradient
