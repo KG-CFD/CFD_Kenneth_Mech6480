@@ -2,17 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time as timer
 
-LX = 0.6
-LY = 0.03
-H =0.03
-h_inlet = 0.02
-A_r = h_inlet/ H
-h_step = 0.01
-w_step = 0.22
-RHO = 998.
+LX = 0.6 # Horizontal length in Metres
+LY = 0.03 # Vertical Outlet height in metres
+H =0.03   # vertical Outlet height in metres
+h_inlet = 0.02   # inlet Height
+A_r = h_inlet/ H   #Ratio of Areas
+h_step = 0.01  # Step height
+w_step = 0.22  # Width of Step
+RHO = 998. # Density in Kg per m^3
 MU = 0.001
 nu = MU / RHO
-U_inlet =0.011523
+U_inlet =0.011523 #ms-1
 NX = 300
 NY = 15
 Step_cell_y = (h_step/LY)*NY
@@ -58,7 +58,7 @@ def boundary_xvel(vel_field):
     vel_field[:, -1] = - vel_field[:, -2]  # Top wall
     vel_field[1:Step_cell_x,Step_cell_y] = -vel_field[1:Step_cell_x, (Step_cell_y + 1)]         # Horizontal step Edge
     vel_field[(Step_cell_x),1:(Step_cell_y+1)]  = 0.0           #Vertical step Edge 1
-    vel_field[:Step_cell_x,:Step_cell_y] =0.0                                                  #Values inside of step excluding ghost cells
+    vel_field[:Step_cell_x,:Step_cell_y] =0.0  # setting all Xvel values in step to zero                                                #Values inside of step excluding ghost cells
     return vel_field
 
 def boundary_yvel(vel_field):
@@ -110,7 +110,7 @@ for steps in range(NUM_STEPS):
         p_next[:,-1] = p_next[:,-2]   #Top wall B.C
         p_next[1:(Step_cell_x+1),Step_cell_y] =p_next[1:(Step_cell_x+1),(Step_cell_y+1)]       #Top of step B.C
         p_next[Step_cell_x,1:(Step_cell_y+1)] = p_next[(Step_cell_x+1),1:(Step_cell_y+1)]
-        p_next[:Step_cell_x,:Step_cell_y]                          #Setting all pressure val in step to 0
+        p_next[:Step_cell_x,:Step_cell_y] = 0.0                          #Setting all pressure val in step to 0
         p = p_next.copy()
     # Step 3: Correct velocities with pressure gradient
     u[1:-1, 1:-1] = ut[1:-1, 1:-1] - DT*(1/dx) * (p[2:-1, 1:-1] - p[1:-2, 1:-1]) / RHO
@@ -128,10 +128,12 @@ for steps in range(NUM_STEPS):
         # interpolate velocity field to consistent locations
         uu =0.5*(u[0:NX+1,1:NY+2] + u[0:NX+1, 0:NY+1])
         vv = 0.5*(v[1:NX+2, 0:NY+1] +v[0:NX+1, 0:NY+1])
+        uu[:(Step_cell_x +1),:(Step_cell_y+1)] = 0.0
+        vv[:(Step_cell_x +1),:(Step_cell_y+1)] =0.0
         xx,yy =np.meshgrid(xnodes,ynodes,indexing='ij')
         ax1.clear()
         ax1.contourf(xx,yy,np.sqrt(uu*2 +vv**2))
         ax1.quiver(xx,yy,uu,vv)
-        fig.savefig('Channel flow _{(steps+1):4d}')
+        fig.savefig('Backwards_facing_step _{(steps+1):4d}')
         plt.pause(0.1)
 plt.show()
