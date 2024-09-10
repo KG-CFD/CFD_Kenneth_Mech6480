@@ -9,18 +9,18 @@ h_inlet = 0.02   # inlet Height
 A_r = h_inlet/H   # Ratio of Areas
 h_step = 0.01  # Step height
 w_step = 0.22  # Width of Step
-RHO = 998  # Density in Kg per m^3
+RHO = 998.  # Density in Kg per m^3
 MU = 0.001
 nu = MU / RHO
 U_inlet = 0.011523  #ms-1
-NX = 300
-NY = 15
-Step_cell_y = 5    #int((h_step/LY)*NY)
-Step_cell_x = 110        #int((w_step/LX)*NX)
+NX = 900
+NY = 45
+Step_cell_y =  int((h_step/LY)*NY)
+Step_cell_x = int((w_step/LX)*NX)
 DT = 0.005
-NUM_STEPS = 1000
-PLOT_EVERY = 100
-N_PRESSURE_ITS = 100
+NUM_STEPS = 2000
+PLOT_EVERY = 500
+N_PRESSURE_ITS = 300
 
 u = np.zeros((NX+1, NY+2), float)
 v = np.zeros((NX+2, NY+1), float)
@@ -43,7 +43,7 @@ dx = LX / NX
 dy = LY / NY
 dxdy = dx * dy
 
-fig, ax1 = plt.subplots(1, 1, figsize=[15, 30])
+fig, ax1 = plt.subplots(1, 1, figsize=[15, 300])
 
 
 def boundary_xvel(vel_field):
@@ -132,7 +132,7 @@ for steps in range(NUM_STEPS):
         vv[:(Step_cell_x +1),:(Step_cell_y+1)] =0.0
         xx,yy =np.meshgrid(xnodes,ynodes,indexing='ij')
         ax1.clear()
-        ax1.contourf(xx,yy,np.sqrt(uu*2 +vv**2))
+        ax1.contourf(xx,yy,np.sqrt(uu**2 +vv**2))
         ax1.quiver(xx,yy,uu,vv)
         fig.savefig('Backwards_facing_step _{(steps+1):4d}')
         plt.pause(0.1)
