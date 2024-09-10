@@ -3,17 +3,17 @@ import matplotlib.pyplot as plt
 import cmasher as cmr
 from tqdm import tqdm
 
-N_POINTS_Y = 15
+N_POINTS_Y = 30
 ASPECT_RATIO = 20
 KINEMATIC_VISCOSITY = 0.01
-TIME_STEP_LENGTH = 0.001
-N_TIME_STEPS = 6000
-PLOT_EVERY = 100
+TIME_STEP_LENGTH = 0.005
+N_TIME_STEPS = 4000
+PLOT_EVERY = 600
 
-STEP_HEIGHT_POINTS = 7
-STEP_WIDTH_POINTS = 60
+STEP_HEIGHT_POINTS = 10
+STEP_WIDTH_POINTS = 220
 
-N_PRESSURE_POISSON_ITERATIONS = 50
+N_PRESSURE_POISSON_ITERATIONS = 100
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
     coordinates_x, coordinates_y = np.meshgrid(x_range, y_range)
 
     # Initial condition
-    velocity_x_prev = np.ones((N_POINTS_Y + 1, n_points_x))
+    velocity_x_prev = 1*np.ones((N_POINTS_Y + 1, n_points_x))
     velocity_x_prev[:(STEP_HEIGHT_POINTS + 1), :] = 0.0
 
     # Top Edge
@@ -451,7 +451,7 @@ def main():
                 coordinates_x,
                 coordinates_y,
                 velocity_x_vertex_centered,
-                levels=10,
+                levels=13,
                 cmap=cmr.amber,
                 vmin=-1.5,
                 vmax=1.5,
