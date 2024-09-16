@@ -5,18 +5,18 @@ import time as timer
 LX = 1
 LY = 1
 RHO = 1.
-MU = 0.01
-Re = 2000
-nu = MU / RHO
-U_North = Re * nu / LX
+Re = 2500
+U_North = 1.0
 U_South = 0.
 V_East = 0.
 V_West = 0.
-NX = 75
-NY = 75
-DT = 0.0001
-NUM_STEPS = 10001
-PLOT_EVERY = 1000
+MU = RHO* U_North *LX / Re
+nu=MU/RHO
+NX = 50
+NY = 50
+DT = 0.0005
+NUM_STEPS = 30001
+PLOT_EVERY = 2500
 N_PRESSURE_ITS = 100
 
 u = np.zeros((NX + 1, NY + 2), float)
@@ -105,8 +105,7 @@ for steps in range(NUM_STEPS):
     if ((steps + 1) % PLOT_EVERY == 0):
         divu = (u[1:, 1:-1] - u[:-1, 1:-1]) / dx + (v[1:-1, 1:] - v[1:-1, :-1]) / dy
         toc = timer.time()
-        print(
-            f"Step {steps}, norm of div(u): {np.linalg.norm(divu):.4e}. \n Sec per it = {(toc - tic) / (steps + 1):.4e}")
+        print(f"Step {steps}, norm of div(u): {np.linalg.norm(divu)}. \n Sec per it = {(toc - tic) / (steps + 1):.4e}")
 
         # Interpolate velocity field to the correct locations (as you have NX + 1, NY + 1 points)
         uu = 0.5 * (u[0:NX + 1, 1:NY + 2] + u[0:NX + 1, 0:NY + 1])  # u velocity at cell centers
