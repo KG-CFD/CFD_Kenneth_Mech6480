@@ -11,16 +11,18 @@ h_step = 0.01  # Step height
 w_step = 0.22  # Width of Step
 RHO = 998.  # Density in Kg per m^3
 MU = 0.001
+Re =230
 nu = MU / RHO
-U_inlet = 0.011523  #ms-1
+U_inlet = Re*MU/(RHO*h_inlet) #0.011523  #ms-1
+print(U_inlet)
 NX = 900
 NY = 45
 Step_cell_y =  int((h_step/LY)*NY)
 Step_cell_x = int((w_step/LX)*NX)
-DT = 0.005
-NUM_STEPS = 2000
-PLOT_EVERY = 500
-N_PRESSURE_ITS = 300
+DT = 0.001          #time step
+NUM_STEPS = 20000
+PLOT_EVERY = 20000
+N_PRESSURE_ITS = 100
 
 u = np.zeros((NX+1, NY+2), float)
 v = np.zeros((NX+2, NY+1), float)
@@ -39,21 +41,21 @@ J_u_y = np.zeros((NX-1, NY+1))
 J_v_x = np.zeros((NX+1, NY-1))
 J_v_y = np.zeros((NX, NY))
 
-dx = LX / NX
-dy = LY / NY
+dx = LX / NX     #grid spacing
+dy = LY / NY     #grid spacing
 dxdy = dx * dy
 
 fig, ax1 = plt.subplots(1, 1, figsize=[15, 300])
 
 
-def boundary_xvel(vel_field):
+def boundary_xvel(vel_field):   # function that implements Boundary conditions
     vel_field[0,Step_cell_y +1:-1] = U_inlet  # Inflow conditions for y>0.01m
     vel_field[0, 0:(Step_cell_y+1)] = 0.0                          # Inflow I.c for y<0.01m
     u_in = np.sum(vel_field[0, (Step_cell_y +1):-1])  ; u_out = np.sum(vel_field[-2,1:-1])
     epsilon =1e-10
     if u_out == 0:
         u_out = epsilon
-    vel_field[-1, :] = vel_field[-2, :] *A_r* u_in/u_out  # Outflow
+    vel_field[-1, :] = vel_field[-2, :] *A_r* u_in/u_out  # Outflow Balancing of mass With different areas
     vel_field[(Step_cell_x +1):-1 ,0] = - vel_field[(Step_cell_x + 1):-1, 1]  # Bottom wall
     vel_field[:, -1] = - vel_field[:, -2]  # Top wall
     vel_field[1:Step_cell_x,Step_cell_y] = -vel_field[1:Step_cell_x, (Step_cell_y + 1)]         # Horizontal step Edge
@@ -92,8 +94,8 @@ for steps in range(NUM_STEPS):
     J_v_y = 0.25 * (v[1:-1, 1:] + v[1:-1, :-1])** 2
     J_v_y -= nu * (v[1:-1, 1:] - v[1:-1, :-1])/ dy
 
-    ut[1:-1, 1:-1] = u[1:-1, 1:-1] - (DT / dxdy) * (dy * (J_u_x[1:, :] - J_u_x[:-1, :]) + dx * (J_u_y[:, 1:] - J_u_y[:, :-1]))
-    vt[1:-1, 1:-1] = v[1:-1, 1:-1] - (DT / dxdy) * (dy * (J_v_x[1:, :] - J_v_x[:-1, :]) + dx * (J_v_y[:, 1:] - J_v_y[:, :-1]))
+    ut[1:-1, 1:-1] = u[1:-1, 1:-1] - (DT / dxdy) * (dy * (J_u_x[1:, :] - J_u_x[:-1, :]) + dx * (J_u_y[:, 1:] - J_u_y[:, :-1])) # Tentative velocity div free
+    vt[1:-1, 1:-1] = v[1:-1, 1:-1] - (DT / dxdy) * (dy * (J_v_x[1:, :] - J_v_x[:-1, :]) + dx * (J_v_y[:, 1:] - J_v_y[:, :-1]))  #tentative velocity
 
     ut = boundary_xvel(ut)
     vt = boundary_yvel(vt)
@@ -128,12 +130,61 @@ for steps in range(NUM_STEPS):
         # interpolate velocity field to consistent locations
         uu =0.5*(u[0:NX+1,1:NY+2] + u[0:NX+1, 0:NY+1])
         vv = 0.5*(v[1:NX+2, 0:NY+1] +v[0:NX+1, 0:NY+1])
-        uu[:(Step_cell_x +1),:(Step_cell_y+1)] = 0.0
-        vv[:(Step_cell_x +1),:(Step_cell_y+1)] =0.0
+        uu[:(Step_cell_x +1),:(Step_cell_y+1)] = 0.0   #setting all values in step to zero
+        vv[:(Step_cell_x +1),:(Step_cell_y+1)] =0.0    #setting all values in step to zero
         xx,yy =np.meshgrid(xnodes,ynodes,indexing='ij')
-        ax1.clear()
-        ax1.contourf(xx,yy,np.sqrt(uu**2 +vv**2))
-        ax1.quiver(xx,yy,uu,vv)
-        fig.savefig('Backwards_facing_step _{(steps+1):4d}')
-        plt.pause(0.1)
+        fig, ax1 = plt.subplots(1, 1, figsize=(12, 8))  # Adjust width and height as needed
+        ax1.contourf(xx, yy, np.sqrt(uu ** 2 + vv ** 2), levels=30, cmap='viridis')
+        ax1.set_title(f'Flow Contour at Time (Time = {time:.3f} s)')
+        ax1.set_aspect('equal', 'box')
+
+        # Add colorbar
+        cbar = fig.colorbar(ax1.contourf(xx, yy, np.sqrt(uu ** 2 + vv ** 2), levels=30, cmap='viridis'), ax=ax1)
+        cbar.set_label('Velocity Magnitude (m/s)')
+
+
+
+
+plt.show()
+x_nodes = np.linspace(0, LX, NX + 1)
+y_nodes = np.linspace(0, LY, NY + 1)
+# Now, U, V have the same shape as xnodes, ynodes (NX+1, NY+1)
+plt.figure(figsize=(8, 6))
+plt.streamplot(x_nodes, y_nodes, uu.T, vv.T, density=1.5, linewidth=1, arrowsize=1, cmap='cool')
+plt.title(f'Streamlines of Velocity Field at Time (Time = {time:.3f} s)')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, LX)
+plt.ylim(0, LY)
+plt.gca().set_aspect('equal', 'box')
+plt.show()
+x_pos_1 = Step_cell_x - 1  # One control volume before the end of the step
+x_pos_2 = int((w_step + 0.06) / LX * NX)  # Roughly 6 cm after the step
+
+# Extract  velocity for both positions
+u_slice_1 = uu[x_pos_1, :]
+u_slice_2 = uu[x_pos_2, :]
+
+# Create plots
+plt.figure(figsize=(10, 6))
+
+# Plot horizontal velocity one control volume before the end of the step
+plt.subplot(2, 1, 1)
+plt.plot(ynodes, u_slice_1, label=f'X = {xnodes[x_pos_1]:.2f} m', color='blue')
+plt.title('Horizontal Velocity (u) 1 Control Volume Before the End of the Step')
+plt.xlabel('Y Position (m)')
+plt.ylabel('Horizontal Velocity (u) (m/s)')
+plt.grid(True)
+plt.legend()
+
+# Plot horizontal velocity 6 cm after the step
+plt.subplot(2, 1, 2)
+plt.plot(ynodes, u_slice_2, label=f'X = {xnodes[x_pos_2]:.2f} m', color='green')
+plt.title('Horizontal Velocity (u) 6 cm After the Step')
+plt.xlabel('Y Position (m)')
+plt.ylabel('Horizontal Velocity (u) (m/s)')
+plt.grid(True)
+plt.legend()
+
+plt.tight_layout()
 plt.show()
