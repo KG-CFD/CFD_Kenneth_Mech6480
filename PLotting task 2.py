@@ -35,5 +35,5 @@ plt.legend()
 
 # Show the plot
 plt.grid(True)
-plt.show()
 plt.savefig('Task2_Cp')
+plt.show()
