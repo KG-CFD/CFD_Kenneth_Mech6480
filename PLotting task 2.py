@@ -10,11 +10,11 @@ file2 = 'Line2.csv'
 data2 = pd.read_csv(file2)
 
 # Assuming the first two columns are 'x' and 'y'
-x1 = data1.iloc[:, 0]
-y1 = data1.iloc[:, 1]
+x1 = data1.iloc[:, 1]
+y1 = data1.iloc[:, 2]
 
-x2 = data2.iloc[:, 0]
-y2 = data2.iloc[:, 1]
+x2 = data2.iloc[:, 1]
+y2 = data2.iloc[:, 2]
 
 # Plotting the data
 plt.figure(figsize=(8, 6))
@@ -26,9 +26,9 @@ plt.plot(x1, y1, label='Cone 1', marker='o')
 plt.plot(x2, y2, label='Cone 2', marker='s')
 
 # Add labels and title
-plt.xlabel('X')
-plt.ylabel('Surface Pressure')
-plt.title('Surface Pressure Over Two Cones')
+plt.xlabel('x')
+plt.ylabel('Cp')
+plt.title('Co-efficient of Pressure over 2 cone surfaces')
 
 # Add legend
 plt.legend()
@@ -36,3 +36,4 @@ plt.legend()
 # Show the plot
 plt.grid(True)
 plt.show()
+plt.savefig('Task2_Cp')
