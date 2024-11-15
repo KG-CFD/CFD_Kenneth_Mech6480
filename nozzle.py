@@ -15,5 +15,5 @@ plt.plot(x1,y1,'b')
 plt.title('Pressure variation at inlet over time')
 plt.xlabel('Time')
 plt.ylabel('Pressure (Pa)')
-
+plt.savefig('Pressure variation over time for inlet.png')
 plt.show()
